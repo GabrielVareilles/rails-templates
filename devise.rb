@@ -21,7 +21,8 @@ gem 'font-awesome-sass'
 gem 'sass-rails'
 gem 'simple_form'
 gem 'uglifier'
-gem 'webpacker'
+gem 'webpacker', '~> 3.0'
+gem 'slim-rails'
 
 group :development do
   gem 'web-console', '>= 3.3.0'
@@ -72,42 +73,42 @@ gsub_file('config/environments/development.rb', /config\.assets\.debug.*/, 'conf
 # Layout
 ########################################
 run 'rm app/views/layouts/application.html.erb'
-file 'app/views/layouts/application.html.erb', <<-HTML
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>TODO</title>
-    <%= csrf_meta_tags %>
-    <%= action_cable_meta_tag %>
-    <%= stylesheet_link_tag 'application', media: 'all' %>
-    <%#= stylesheet_pack_tag 'application', media: 'all' %> <!-- Uncomment if you import CSS in app/javascript/packs/application.js -->
-  </head>
-  <body>
-    <%= render 'shared/navbar' %>
-    <%= render 'shared/flashes' %>
-    <%= yield %>
-    <%= javascript_include_tag 'application' %>
-    <%= javascript_pack_tag 'application' %>
-  </body>
-</html>
-HTML
+file 'app/views/layouts/application.html.slim', <<-SLIM
+doctype html
+html
+  head
+    meta charset="UTF-8"
+    meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    link rel="shortcut icon" type="image/x-icon" href="http://www.macnotes.de/images/ruby-on-rails.png"
+    title New App
+    = csrf_meta_tags
+    = action_cable_meta_tag
+    = stylesheet_link_tag 'application', media: 'all'
+  body
+    = render 'shared/navbar'
+    = render 'shared/flashes'
+    = yield
+    = javascript_pack_tag 'application'
+    = javascript_include_tag 'application'
+    = yield :after_js
+SLIM
 
-file 'app/views/shared/_flashes.html.erb', <<-HTML
-<% if notice %>
-  <div class="alert alert-info alert-dismissible" role="alert">
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-    <%= notice %>
-  </div>
-<% end %>
-<% if alert %>
-  <div class="alert alert-warning alert-dismissible" role="alert">
-    <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-    <%= alert %>
-  </div>
-<% end %>
-HTML
+file 'app/views/shared/_flashes.html.slim', <<-SLIM
+- if notice
+  .alert.alert-info.alert-dismissible role="alert"
+    button.close type="button" data-dismiss="alert" aria-lable="Close"
+      span aria-hidden="true" &times;
+    = notice
+- if alert
+  .alert.alert-warning.alert-dismissible role="alert"
+    button.close type="button" data-dismiss="alert" aria-lable="Close"
+      span aria-hidden="true" &times;
+    = alert
+SLIM
+
+run 'curl -L https://raw.githubusercontent.com/Meyclem/rails_templates/master/files/_navbar.html.slim > app/views/shared/_navbar.html.slim'
+run 'curl -L https://raw.githubusercontent.com/Meyclem/rails_templates/master/files/logo.png > app/assets/images/logo.png'
+
 
 run 'curl -L https://raw.githubusercontent.com/lewagon/awesome-navbars/master/templates/_navbar_wagon.html.erb > app/views/shared/_navbar.html.erb'
 run 'curl -L https://raw.githubusercontent.com/lewagon/rails-templates/master/logo.png > app/assets/images/logo.png'
@@ -123,6 +124,7 @@ file 'README.md', markdown_file_content, force: true
 ########################################
 generators = <<-RUBY
 config.generators do |generate|
+      generate.template_engine :slim
       generate.assets false
       generate.helper false
     end
